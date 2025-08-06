@@ -1,0 +1,18 @@
+{
+  "name": "script-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:figma": "script\\figma-mcp.bat",
+    "start:git-fetch-win": "script\\shallow_fetch.sh",
+    "kook-start": "env-cmd -f .env.local node script/kook-start.mjs"
+  },
+  "dependencies": {
+    "carlo": "^0.9.46",
+    "dotenv": "^17.2.1",
+    "env-cmd": "^10.1.0",
+    "inquirer": "^12.9.0",
+    "puppeteer-core": "^24.15.0"
+  }
+}
