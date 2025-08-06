@@ -1,0 +1,1 @@
+pnpx figma-developer-mcp --figma-api-key=figd_MM8Qmiv_D2X4y8KFEfajdOJ84__k8vIboaEwtPEJ
