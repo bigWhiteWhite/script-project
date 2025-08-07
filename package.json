@@ -6,6 +6,7 @@
   "scripts": {
     "start:figma": "script\\figma-mcp.bat",
     "start:git-fetch-win": "script\\shallow_fetch.sh",
+    "start:clean_git_cache": "script\\clean_git_cache.sh",
     "start:kook-release": "env-cmd -f .env.local node script/kook-release.mjs"
   },
   "dependencies": {
