@@ -69,9 +69,10 @@ const run = async (username, password, kookName) => {
                 await newPage.waitForSelector("#appname_form .bs-placeholder");
                 await newPage.click("#appname_form .bs-placeholder");
                 await newPage.type(".bs-searchbox .form-control", kookName);
-                await newPage.click(".optgroup-2.active");
-                await newPage.waitForSelector('input[name="online_desc"]');
-                await newPage.type('input[name="online_desc"]', `${kookName} ${new Date().toLocaleString()} 发布`);
+                // 由于输入后下拉出现，我们等待活动项最多5秒
+                await newPage.waitForSelector('.dropdown-menu.inner > li.active', { visible: true, timeout: 5000 });
+                await newPage.click('.dropdown-menu.inner > li.active');
+                await newPage.waitForSelector('#modal-223002');
                 await newPage.click("#modal-223002");
                 await newPage.waitForSelector("#modal-container-223002");
                 await delay(1000);
