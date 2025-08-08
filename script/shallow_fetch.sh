@@ -26,7 +26,26 @@ fix_windows_path() {
     path="${path//  / }"
     # 确保路径以斜杠结尾
     [[ "$path" != */ ]] && path="$path/"
+    # 删除重复的斜杠
+    path="${path//\/\//\/}"
     echo "$path"
+}
+
+# ----------------------------
+# 获取默认路径（当前脚本所在目录）
+# ----------------------------
+get_default_path() {
+    # 设置固定默认路径为 D:\work\apis
+    local default_path="D:\\work\\mib\\front-end\\官网\\mimu-website-outside-project"
+
+    # 转换为正确的路径格式（处理反斜杠和空格）
+    default_path="${default_path//\\//}"  # 替换反斜杠为正斜杠
+    default_path="${default_path//  / }"  # 修复双空格
+
+    # 确保路径以斜杠结尾
+    [[ "$default_path" != */ ]] && default_path="$default_path/"
+
+    echo "$default_path"
 }
 
 # ----------------------------
@@ -37,18 +56,29 @@ get_input() {
     echo "提示："
     echo "1. 可直接粘贴Windows路径（如 D:\work\my project）"
     echo "2. 路径中的空格会被自动处理"
+    echo "3. 直接回车使用默认路径（当前脚本所在目录）"
     echo "--------------------------------------"
-    
+
+    # 获取默认路径
+    DEFAULT_PATH=$(get_default_path)
+
     # 获取项目路径
-    echo -n "请输入项目路径："
+    echo -n "请输入项目路径 (默认: $DEFAULT_PATH): "
     read -r project_dir_raw
-    
-    # 修复路径格式
-    PROJECT_DIR=$(fix_windows_path "$project_dir_raw")
-    
+
+    # 如果用户直接回车，使用默认路径
+    if [ -z "$project_dir_raw" ]; then
+        PROJECT_DIR=$DEFAULT_PATH
+    else
+        # 修复路径格式
+        PROJECT_DIR=$(fix_windows_path "$project_dir_raw")
+    fi
+
     # 删除结尾的斜杠（如果有）
     PROJECT_DIR="${PROJECT_DIR%/}"
-    
+
+    echo "使用的项目路径: $PROJECT_DIR"
+
     # 验证项目路径是否存在
     if [ ! -d "$PROJECT_DIR" ]; then
         echo "--------------------------------------"
@@ -81,7 +111,7 @@ get_input() {
     # 获取分支名称
     echo -n "请输入分支名称 (如: dev): "
     read -r BRANCH_NAME
-    
+
     if [ -z "$BRANCH_NAME" ]; then
         echo "--------------------------------------"
         echo "错误：分支名称不能为空！"
@@ -89,7 +119,7 @@ get_input() {
         read
         exit 1
     fi
-    
+
     REMOTE="origin"  # 默认远程源名称
 }
 
@@ -102,32 +132,32 @@ git_operations() {
     echo "项目路径: $PROJECT_DIR"
     echo "分支名称: $BRANCH_NAME"
     echo
-    
+
     # 验证远程分支是否存在
     echo "[1/4] 验证分支有效性..."
     if ! git ls-remote --exit-code $REMOTE "refs/heads/$BRANCH_NAME" &>/dev/null; then
         echo "错误：远程分支 '$BRANCH_NAME' 不存在！"
         return 1
     fi
-    
+
     # 设置远程分支追踪
     echo "[2/4] 设置分支追踪..."
     if ! git remote set-branches $REMOTE "$BRANCH_NAME" 2>/dev/null; then
         echo "错误：分支追踪设置失败！"
         return 1
     fi
-    
+
     # 执行浅克隆获取
     echo "[3/4] 拉取浅历史（深度=2）..."
     if ! git fetch --depth=2 $REMOTE "$BRANCH_NAME" 2>/dev/null; then
         echo "错误：拉取操作失败！"
         return 1
     fi
-    
+
     # 切换到目标分支
     echo "[4/4] 切换到分支 '$BRANCH_NAME'..."
     CURRENT_BRANCH=$(git branch --show-current 2>/dev/null)
-    
+
     # 检查是否已在目标分支
     if [ "$CURRENT_BRANCH" = "$BRANCH_NAME" ]; then
         echo "  - 已在目标分支，执行更新..."
@@ -146,7 +176,7 @@ git_operations() {
             return 1
         fi
     fi
-    
+
     # 显示成功信息
     echo "--------------------------------------"
     echo "操作成功完成！"
